@@ -1,5 +1,4 @@
 const cheerio = require("cheerio");
-const fs = require("fs");
 const express = require("express");
 const axios = require("axios");
 const app = express();
@@ -34,6 +33,7 @@ app.get('/', async(req, res) => {
             "name": avatarName,
             "img": avatarImg,
             "profileURL": url,
+            "num_badges": badges.length,
             "badges": badges
         }
         res.send(responseObj);
