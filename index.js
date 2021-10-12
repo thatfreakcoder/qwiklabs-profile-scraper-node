@@ -6,19 +6,21 @@ const app = express();
 
 app.get('/', async(req, res) => {
     try {
+        // fetching Profile URL from Query Parameters 
         const url = req.query.url;
         // Fetch HTML of the Page
         const { data } = await axios.get(url);
-        // Parse HTML fetched before
+        // Parse fetched HTML
         const $ = cheerio.load(data);
         // Select desired class and tags
-        const avatarName = $(".ql-headline-1");
-        console.log(avatarName.text());
+        const avatarName = $(".ql-headline-1").text().split("\n").join("");
+        const avatarImg = $(".text--center").children("ql-avatar").attr("src");
+        // console.log(avatarImg);
         const badgeListItems = $(".profile-badges .profile-badge");
         // Stores data for all countries
-        const badges = [];
+        var badges = [];
         badgeListItems.each((idx, el) => {
-            const badge = { name: "", completed_on: "" };
+            var badge = { name: "", completed_on: "" };
             var components = $(el).text().split("\n\n\n")
             var name = components[1];
             var completionDate = components[2].split("\n\n");
@@ -28,23 +30,13 @@ app.get('/', async(req, res) => {
                 badges.push(badge);
             }
         });
-        if (badges.length == 0) {
-            res.send({
-                "response": "error",
-                "message": "No Badges Completed"
-            })
-        } else {
-            res.send(badges);
+        const responseObj = {
+            "name": avatarName,
+            "img": avatarImg,
+            "profileURL": url,
+            "badges": badges
         }
-        // Write countries array in countries.json file
-        // fs.writeFile("coutries.json", JSON.stringify(countries, null, 2), (err) => {
-        //     if (err) {
-        //         console.error(err);
-        //         return;
-        //     }
-        //     console.log("Successfully written data to file");
-        // });
-
+        res.send(responseObj);
     } catch (error) {
         console.error(error);
     }
